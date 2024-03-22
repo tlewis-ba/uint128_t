@@ -314,25 +314,39 @@ namespace BrickAbode.Int128
         public override string ToString() => ToString(null, null);
 
         // IConvertible implementations with corrected nullability annotations
-        TypeCode IConvertible.GetTypeCode() => throw new NotImplementedException();
-        char IConvertible.ToChar(IFormatProvider? provider) => throw new NotImplementedException();
-        DateTime IConvertible.ToDateTime(IFormatProvider? provider) => throw new NotImplementedException();
+        TypeCode IConvertible.GetTypeCode() => TypeCode.Object;
+        char IConvertible.ToChar(IFormatProvider? provider) => (char)low;
+
+
+        DateTime IConvertible.ToDateTime(IFormatProvider? provider)
+        {
+            if ((high != 0) || (low > long.MaxValue))
+            {
+                throw new InvalidCastException("UInt128 contains a value that cannot be represented as a DateTime.");
+            }
+
+            return new DateTime((long)low);
+        }
 
         // IConvertible implementations
         bool IConvertible.ToBoolean(IFormatProvider? provider) => high != 0 || low != 0;
         byte IConvertible.ToByte(IFormatProvider? provider) => (byte)low;
+
         // Other conversions...
         decimal IConvertible.ToDecimal(IFormatProvider? provider) => (decimal)ToBigInteger(this);
-        double IConvertible.ToDouble(IFormatProvider? provider) => (double)ToBigInteger(this);
         float IConvertible.ToSingle(IFormatProvider? provider) => (float)ToBigInteger(this);
+        double IConvertible.ToDouble(IFormatProvider? provider) => (double)ToBigInteger(this);
+
+        sbyte IConvertible.ToSByte(IFormatProvider? provider) => (sbyte)low;
+        string IConvertible.ToString(IFormatProvider? provider) => ToString();
+
+        short IConvertible.ToInt16(IFormatProvider? provider) => (short)low;
         int IConvertible.ToInt32(IFormatProvider? provider) => (int)low;
         long IConvertible.ToInt64(IFormatProvider? provider) => (long)low;
-        sbyte IConvertible.ToSByte(IFormatProvider? provider) => (sbyte)low;
-        short IConvertible.ToInt16(IFormatProvider? provider) => (short)low;
-        string IConvertible.ToString(IFormatProvider? provider) => ToString();
+
+        ushort IConvertible.ToUInt16(IFormatProvider? provider) => (ushort)low;
         uint IConvertible.ToUInt32(IFormatProvider? provider) => (uint)low;
         ulong IConvertible.ToUInt64(IFormatProvider? provider) => low;
-        ushort IConvertible.ToUInt16(IFormatProvider? provider) => (ushort)low;
 
         object IConvertible.ToType(Type conversionType, IFormatProvider? provider)
         {
