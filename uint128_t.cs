@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace BrickAbode.Int128
@@ -10,8 +11,8 @@ namespace BrickAbode.Int128
     public struct UInt128 : IComparable, IFormattable, IConvertible,
                              IComparable<UInt128>, IEquatable<UInt128>
     {
-        private readonly ulong high;
-        private readonly ulong low;
+        private ulong high;
+        private ulong low;
 
         public UInt128(ulong high, ulong low)
         {
@@ -93,16 +94,60 @@ namespace BrickAbode.Int128
             return new UInt128(high, low);
         }
 
-        public static UInt128 operator /(UInt128 a, UInt128 b) => throw new NotImplementedException();
-        public static UInt128 operator %(UInt128 a, UInt128 b) => throw new NotImplementedException();
+        private static BigInteger ToBigInteger(UInt128 value)
+        {
+            return new BigInteger(value.low) + (new BigInteger(value.high) << 64);
+        }
+
+        // Helper method to convert BigInteger to UInt128
+        private static UInt128 FromBigInteger(BigInteger value)
+        {
+            byte[] bytes = value.ToByteArray();
+            ulong low = BitConverter.ToUInt64(bytes, 0);
+            ulong high = bytes.Length > 8 ? BitConverter.ToUInt64(bytes, 8) : 0;
+            return new UInt128(high, low);
+        }
+
+        public static UInt128 operator /(UInt128 a, UInt128 b)
+        {
+            BigInteger bigA = ToBigInteger(a);
+            BigInteger bigB = ToBigInteger(b);
+            BigInteger result = bigA / bigB;
+            return FromBigInteger(result);
+        }
+
+        public static UInt128 operator %(UInt128 a, UInt128 b)
+        {
+            BigInteger bigA = ToBigInteger(a);
+            BigInteger bigB = ToBigInteger(b);
+            BigInteger result = bigA % bigB;
+            return FromBigInteger(result);
+        }
 
         // Unary negation and plus
         public static UInt128 operator -(UInt128 a) => throw new NotImplementedException();
         public static UInt128 operator +(UInt128 a) => a;  // Unary plus does not change the value
 
         // Increment and decrement
-        public static UInt128 operator ++(UInt128 a) => throw new NotImplementedException();
-        public static UInt128 operator --(UInt128 a) => throw new NotImplementedException();
+        public static UInt128 operator ++(UInt128 a)
+        {
+            a.low++;
+            if (a.low == 0)
+            {
+                a.high++;
+            }
+            return a;
+        }
+
+        public static UInt128 operator --(UInt128 a)
+        {
+            if (a.low == 0)
+            {
+                a.high--;
+            }
+            a.low--;
+            return a;
+        }
 
         // Bitwise operators
         public static UInt128 operator &(UInt128 a, UInt128 b)
@@ -112,19 +157,102 @@ namespace BrickAbode.Int128
             return new UInt128(h, l);
         }
 
-        public static UInt128 operator |(UInt128 a, UInt128 b) => throw new NotImplementedException();
-        public static UInt128 operator ^(UInt128 a, UInt128 b) => throw new NotImplementedException();
-        public static UInt128 operator ~(UInt128 a) => throw new NotImplementedException();
+        public static UInt128 operator |(UInt128 a, UInt128 b)
+        {
+            ulong h = a.high | b.high;
+            ulong l = a.low | b.low;
+            return new UInt128(h, l);
+        }
+
+        public static UInt128 operator ^(UInt128 a, UInt128 b)
+        {
+            ulong h = a.high ^ b.high;
+            ulong l = a.low ^ b.low;
+            return new UInt128(h, l);
+        }
+
+        public static UInt128 operator ~(UInt128 a)
+        {
+            ulong h = ~a.high;
+            ulong l = ~a.low;
+            return new UInt128(h, l);
+        }
 
         // Shift operators
-        public static UInt128 operator <<(UInt128 a, int shift) => throw new NotImplementedException();
-        public static UInt128 operator >>(UInt128 a, int shift) => throw new NotImplementedException();
+        // FIXME: both of these should be fixed to the mutable style
+        public static UInt128 operator <<(UInt128 a, int shift)
+        {
+            ulong h = 0;
+            ulong l = 0;
+            if(shift < 64)
+            {
+                l = a.low << shift;
+                h = (a.low >> (64-shift)) | (a.high << shift);
+            }
+            else if(shift == 64)
+            {
+                h = a.low;
+            }
+            else if(shift < 128)
+            {
+                h = a.low << (shift - 64);
+            }
+            else
+            {
+                // h = 0;
+                // l = 0;
+            }
 
+            return new UInt128(h, l);
+        }
+
+        public static UInt128 operator >>(UInt128 a, int shift)
+    {
+            ulong h = 0;
+            ulong l = 0;
+            if(shift < 64)
+            {
+                h = a.high >> shift;
+                l = (a.high << (64-shift)) | (a.low >> shift);
+            }
+            else if(shift == 64)
+            {
+                l = a.high;
+            }
+            else if(shift < 128)
+            {
+                l = a.high >> (shift - 64);
+            }
+            else
+            {
+                // h = 0;
+                // l = 0;
+            }
+
+            return new UInt128(h, l);
+        }
 
         // IComparable.CompareTo(object? obj)
-        int IComparable.CompareTo(object? obj) => throw new NotImplementedException();
+        public int CompareTo(object? obj)
+        {
+            if (obj == null) return 1; // Consider null to be less than any instance of UInt128
 
-        public int CompareTo(UInt128 other) => throw new NotImplementedException();
+            if (!(obj is UInt128))
+                throw new ArgumentException("Object must be of type UInt128.", nameof(obj));
+
+            return CompareTo((UInt128)obj);
+        }
+
+        public int CompareTo(UInt128 other)
+        {
+            if (high > other.high) return 1;
+            if (high < other.high) return -1;
+
+            if (low > other.low) return 1;
+            if (low < other.low) return -1;
+
+            return 0;
+        }
 
         public bool Equals(UInt128 other)
         {
@@ -187,22 +315,31 @@ namespace BrickAbode.Int128
 
         // IConvertible implementations with corrected nullability annotations
         TypeCode IConvertible.GetTypeCode() => throw new NotImplementedException();
-        bool IConvertible.ToBoolean(IFormatProvider? provider) => throw new NotImplementedException();
         char IConvertible.ToChar(IFormatProvider? provider) => throw new NotImplementedException();
-        sbyte IConvertible.ToSByte(IFormatProvider? provider) => throw new NotImplementedException();
-        byte IConvertible.ToByte(IFormatProvider? provider) => throw new NotImplementedException();
-        short IConvertible.ToInt16(IFormatProvider? provider) => throw new NotImplementedException();
-        ushort IConvertible.ToUInt16(IFormatProvider? provider) => throw new NotImplementedException();
-        int IConvertible.ToInt32(IFormatProvider? provider) => throw new NotImplementedException();
-        uint IConvertible.ToUInt32(IFormatProvider? provider) => throw new NotImplementedException();
-        long IConvertible.ToInt64(IFormatProvider? provider) => throw new NotImplementedException();
-        ulong IConvertible.ToUInt64(IFormatProvider? provider) => throw new NotImplementedException();
-        float IConvertible.ToSingle(IFormatProvider? provider) => throw new NotImplementedException();
-        double IConvertible.ToDouble(IFormatProvider? provider) => throw new NotImplementedException();
-        decimal IConvertible.ToDecimal(IFormatProvider? provider) => throw new NotImplementedException();
         DateTime IConvertible.ToDateTime(IFormatProvider? provider) => throw new NotImplementedException();
-        string IConvertible.ToString(IFormatProvider? provider) => throw new NotImplementedException();
-        object IConvertible.ToType(Type conversionType, IFormatProvider? provider) => throw new NotImplementedException();
+
+        // IConvertible implementations
+        bool IConvertible.ToBoolean(IFormatProvider? provider) => high != 0 || low != 0;
+        byte IConvertible.ToByte(IFormatProvider? provider) => (byte)low;
+        // Other conversions...
+        decimal IConvertible.ToDecimal(IFormatProvider? provider) => (decimal)ToBigInteger(this);
+        double IConvertible.ToDouble(IFormatProvider? provider) => (double)ToBigInteger(this);
+        float IConvertible.ToSingle(IFormatProvider? provider) => (float)ToBigInteger(this);
+        int IConvertible.ToInt32(IFormatProvider? provider) => (int)low;
+        long IConvertible.ToInt64(IFormatProvider? provider) => (long)low;
+        sbyte IConvertible.ToSByte(IFormatProvider? provider) => (sbyte)low;
+        short IConvertible.ToInt16(IFormatProvider? provider) => (short)low;
+        string IConvertible.ToString(IFormatProvider? provider) => ToString();
+        uint IConvertible.ToUInt32(IFormatProvider? provider) => (uint)low;
+        ulong IConvertible.ToUInt64(IFormatProvider? provider) => low;
+        ushort IConvertible.ToUInt16(IFormatProvider? provider) => (ushort)low;
+
+        object IConvertible.ToType(Type conversionType, IFormatProvider? provider)
+        {
+            if (conversionType == typeof(BigInteger))
+                return ToBigInteger(this);
+            throw new InvalidCastException($"Cannot convert to {conversionType.FullName}");
+        }
 
         // Correct operator implementations if necessary
         public static bool operator ==(UInt128 left, UInt128 right) => left.Equals(right);
