@@ -278,39 +278,37 @@ namespace BrickAbode.Int128
             return hashHigh ^ hashLow;
         }
 
-        // IFormattable.ToString(string? format, IFormatProvider? formatProvider)
         public string ToString(string? format, IFormatProvider? formatProvider)
         {
-            string fmt = "X";
-            if (format != null)
-            {
-                fmt = format.ToUpperInvariant();
-            }
+            // Handle null or empty format by using the "G" (General) format.
+            string fmt = string.IsNullOrEmpty(format) ? "G" : format.ToUpperInvariant();
+
             switch (fmt)
             {
-                case "X":
-                    return $"0x{high:X16}{low:X16}"; // Concatenate the hex representation of high and low parts.
-                // case "O": // WTF, dotnet?
-                    // return $"{high:O22}{low:O22}"; // Concatenate the octal representation of high and low parts.
-                case "B":
-                    // Return a binary representation. This is a placeholder.
+                case "X": // Hexadecimal format
+                    return $"0x{high:X16}{low:X16}";
+                case "B": // Binary format - a custom implementation might be needed here
                     return ConvertToBinaryString();
-                // Implement "O" case for octal representation.
+                // case "D": // Decimal format
+                // case "G": // General format - similar to "D", but can be overridden for different types
+                // case "P": // Percent format
+                // case "N": // Number format
+                // case "E": // Exponential format (scientific notation)
+                // case "F": // Fixed-point format
                 default:
-                    throw new FormatException($"The {format} format string is not supported.");
+                    // For unsupported formats, fall back to BigInteger's implementation.
+                    // This includes scientific, fixed-point, number, percent, and custom numeric formats.
+                    return ToBigInteger(this).ToString(format, formatProvider);
             }
         }
+
         private string ConvertToBinaryString()
         {
-            // Convert the high part to binary, ensuring it's padded to 64 characters.
-            string binaryHigh = Convert.ToString((long)high, 2).PadLeft(64, '0');
-
-            // Convert the low part to binary. No need to pad the low part as it naturally fills its space.
-            string binaryLow = Convert.ToString((long)low, 2).PadLeft(64, '0');
-
-            // Concatenate the high and low parts.
-            return binaryHigh + binaryLow;
+            // Convert both high and low parts to binary strings and concatenate them.
+            // Padding left with zeros to ensure the strings represent the full 64 bits of each part.
+            return Convert.ToString((long)high, 2).PadLeft(64, '0') + Convert.ToString((long)low, 2).PadLeft(64, '0');
         }
+
         public override string ToString() => ToString(null, null);
 
         // IConvertible implementations with corrected nullability annotations
@@ -334,19 +332,19 @@ namespace BrickAbode.Int128
 
         // Other conversions...
         decimal IConvertible.ToDecimal(IFormatProvider? provider) => (decimal)ToBigInteger(this);
-        float IConvertible.ToSingle(IFormatProvider? provider) => (float)ToBigInteger(this);
-        double IConvertible.ToDouble(IFormatProvider? provider) => (double)ToBigInteger(this);
+        float   IConvertible.ToSingle(IFormatProvider? provider)  => (float)ToBigInteger(this);
+        double  IConvertible.ToDouble(IFormatProvider? provider)  => (double)ToBigInteger(this);
 
-        sbyte IConvertible.ToSByte(IFormatProvider? provider) => (sbyte)low;
-        string IConvertible.ToString(IFormatProvider? provider) => ToString();
+        sbyte   IConvertible.ToSByte(IFormatProvider? provider)   => (sbyte)low;
+        string  IConvertible.ToString(IFormatProvider? provider)  => ToString();
 
-        short IConvertible.ToInt16(IFormatProvider? provider) => (short)low;
-        int IConvertible.ToInt32(IFormatProvider? provider) => (int)low;
-        long IConvertible.ToInt64(IFormatProvider? provider) => (long)low;
+        short   IConvertible.ToInt16(IFormatProvider? provider)   => (short)low;
+        int     IConvertible.ToInt32(IFormatProvider? provider)   => (int)low;
+        long    IConvertible.ToInt64(IFormatProvider? provider)   => (long)low;
 
-        ushort IConvertible.ToUInt16(IFormatProvider? provider) => (ushort)low;
-        uint IConvertible.ToUInt32(IFormatProvider? provider) => (uint)low;
-        ulong IConvertible.ToUInt64(IFormatProvider? provider) => low;
+        ushort  IConvertible.ToUInt16(IFormatProvider? provider)  => (ushort)low;
+        uint    IConvertible.ToUInt32(IFormatProvider? provider)  => (uint)low;
+        ulong   IConvertible.ToUInt64(IFormatProvider? provider)  => low;
 
         object IConvertible.ToType(Type conversionType, IFormatProvider? provider)
         {
