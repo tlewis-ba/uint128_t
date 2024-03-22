@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace BrickAbode.Int128
+namespace BrickAbode.UInt128
 {
 
     [Serializable]
