@@ -47,6 +47,8 @@ namespace BrickAbode.UInt128
         /// </summary>
         public static readonly int MinValue = new UInt128(0, 0);
 
+        public static readonly int Zero = new UInt128(0, 0);
+
         #endregion
 
         #region Implicit conversions

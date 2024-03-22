@@ -7,6 +7,10 @@ operate as an integer type, so notably, they are mutable.  This is
 unusual for struct types but normal for integers, which are also
 struct types.
 
+## Notes
+
+- It's strange that BigInteger doesn't implement IConvertible; maybe we should add it
+
 ## Thoughts on hardware implementations
 
 The initial implementation is pure C#, but these can potentially
