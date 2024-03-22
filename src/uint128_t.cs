@@ -35,6 +35,27 @@ namespace BrickAbode.UInt128
         }
         #endregion
 
+        public static readonly int MaxValue = new UInt128(ulong.MaxValue, ulong.MaxValue);
+        public static readonly int MinValue = new UInt128(0, 0);
+
+        #region Implicit conversions
+
+        public static implicit operator  short(UInt128 value) => (short)value.low;
+        public static implicit operator    int(UInt128 value) => (int)value.low;
+        public static implicit operator   long(UInt128 value) => (long)value.low;
+        public static implicit operator ushort(UInt128 value) => (ushort)value.low;
+        public static implicit operator   uint(UInt128 value) => (uint)value.low;
+        public static implicit operator  ulong(UInt128 value) => (ulong)value.low;
+
+        public static implicit operator UInt128( short value) => new UInt128(0, (ulong)value);
+        public static implicit operator UInt128(   int value) => new UInt128(0, (ulong)value);
+        public static implicit operator UInt128(  long value) => new UInt128(0, (ulong)value);
+        public static implicit operator UInt128(ushort value) => new UInt128(0, (ulong)value);
+        public static implicit operator UInt128(  uint value) => new UInt128(0, (ulong)value);
+        public static implicit operator UInt128( ulong value) => new UInt128(0, (ulong)value);
+
+        #endregion
+
         #region Arithmetic Operators
 
         /// <summary>
@@ -491,7 +512,7 @@ namespace BrickAbode.UInt128
         /// </summary>
         /// <param name="value">The <see cref="UInt128"/> value to convert.</param>
         /// <returns>A <see cref="BigInteger"/> that represents the converted <see cref="UInt128"/>.</returns>
-        private static BigInteger ToBigInteger(UInt128 value)
+        public static BigInteger ToBigInteger(UInt128 value)
         {
             return new BigInteger(value.low) + (new BigInteger(value.high) << 64);
         }
@@ -501,7 +522,7 @@ namespace BrickAbode.UInt128
         /// </summary>
         /// <param name="value">The <see cref="BigInteger"/> value to convert.</param>
         /// <returns>A <see cref="UInt128"/> that represents the converted <see cref="BigInteger"/>.</returns>
-        private static UInt128 FromBigInteger(BigInteger value)
+        public static UInt128 FromBigInteger(BigInteger value)
         {
             byte[] bytes = value.ToByteArray();
             ulong low = BitConverter.ToUInt64(bytes, 0);
@@ -664,19 +685,4 @@ namespace BrickAbode.UInt128
 
     }
 
-    class Program
-    {
-        static int Main(string[] args)
-        {
-            UInt128 a = new UInt128(1, 2);
-            UInt128 b = new UInt128(0, 3);
-            Console.WriteLine($"a({a:X}) == b({b:B})?  {a == b}");
-#pragma warning disable CS1718
-            Console.WriteLine($"a({a:X}) == a({a:B})?  {a == a}");
-#pragma warning restore CS1718
-            return 0;
-        }
-    }
-
 }
-
