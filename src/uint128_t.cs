@@ -35,24 +35,81 @@ namespace BrickAbode.UInt128
         }
         #endregion
 
+        #region Constants
+
+        /// <summary>
+        /// Represents the maximum value that a <see cref="UInt128"/> instance can hold.
+        /// </summary>
         public static readonly int MaxValue = new UInt128(ulong.MaxValue, ulong.MaxValue);
+
+        /// <summary>
+        /// Represents the minimum value that a <see cref="UInt128"/> instance can hold.
+        /// </summary>
         public static readonly int MinValue = new UInt128(0, 0);
+
+        #endregion
 
         #region Implicit conversions
 
-        public static implicit operator  short(UInt128 value) => (short)value.low;
-        public static implicit operator    int(UInt128 value) => (int)value.low;
-        public static implicit operator   long(UInt128 value) => (long)value.low;
-        public static implicit operator ushort(UInt128 value) => (ushort)value.low;
-        public static implicit operator   uint(UInt128 value) => (uint)value.low;
-        public static implicit operator  ulong(UInt128 value) => (ulong)value.low;
+        /// <summary>
+        /// Implicitly converts the value of a <see cref="UInt128"/> instance to a 16-bit signed integer.
+        /// </summary>
+        public static implicit operator short(UInt128 value) => (short)value.low;
 
-        public static implicit operator UInt128( short value) => new UInt128(0, (ulong)value);
-        public static implicit operator UInt128(   int value) => new UInt128(0, (ulong)value);
-        public static implicit operator UInt128(  long value) => new UInt128(0, (ulong)value);
+        /// <summary>
+        /// Implicitly converts the value of a <see cref="UInt128"/> instance to a 32-bit signed integer.
+        /// </summary>
+        public static implicit operator int(UInt128 value) => (int)value.low;
+
+        /// <summary>
+        /// Implicitly converts the value of a <see cref="UInt128"/> instance to a 64-bit signed integer.
+        /// </summary>
+        public static implicit operator long(UInt128 value) => (long)value.low;
+
+        /// <summary>
+        /// Implicitly converts the value of a <see cref="UInt128"/> instance to a 16-bit unsigned integer.
+        /// </summary>
+        public static implicit operator ushort(UInt128 value) => (ushort)value.low;
+
+        /// <summary>
+        /// Implicitly converts the value of a <see cref="UInt128"/> instance to a 32-bit unsigned integer.
+        /// </summary>
+        public static implicit operator uint(UInt128 value) => (uint)value.low;
+
+        /// <summary>
+        /// Implicitly converts the value of a <see cref="UInt128"/> instance to a 64-bit unsigned integer.
+        /// </summary>
+        public static implicit operator ulong(UInt128 value) => value.low;
+
+        /// <summary>
+        /// Implicitly converts a 16-bit signed integer to a <see cref="UInt128"/> instance.
+        /// </summary>
+        public static implicit operator UInt128(short value) => new UInt128(0, (ulong)value);
+
+        /// <summary>
+        /// Implicitly converts a 32-bit signed integer to a <see cref="UInt128"/> instance.
+        /// </summary>
+        public static implicit operator UInt128(int value) => new UInt128(0, (ulong)value);
+
+        /// <summary>
+        /// Implicitly converts a 64-bit signed integer to a <see cref="UInt128"/> instance.
+        /// </summary>
+        public static implicit operator UInt128(long value) => new UInt128(0, (ulong)value);
+
+        /// <summary>
+        /// Implicitly converts a 16-bit unsigned integer to a <see cref="UInt128"/> instance.
+        /// </summary>
         public static implicit operator UInt128(ushort value) => new UInt128(0, (ulong)value);
-        public static implicit operator UInt128(  uint value) => new UInt128(0, (ulong)value);
-        public static implicit operator UInt128( ulong value) => new UInt128(0, (ulong)value);
+
+        /// <summary>
+        /// Implicitly converts a 32-bit unsigned integer to a <see cref="UInt128"/> instance.
+        /// </summary>
+        public static implicit operator UInt128(uint value) => new UInt128(0, (ulong)value);
+
+        /// <summary>
+        /// Implicitly converts a 64-bit unsigned integer to a <see cref="UInt128"/> instance.
+        /// </summary>
+        public static implicit operator UInt128(ulong value) => new UInt128(0, value);
 
         #endregion
 
@@ -525,6 +582,7 @@ namespace BrickAbode.UInt128
         public static UInt128 FromBigInteger(BigInteger value)
         {
             byte[] bytes = value.ToByteArray();
+            Array.Resize(ref bytes, 16); // Ensure the byte array has a length of at least 16 bytes
             ulong low = BitConverter.ToUInt64(bytes, 0);
             ulong high = bytes.Length > 8 ? BitConverter.ToUInt64(bytes, 8) : 0;
             return new UInt128(high, low);
