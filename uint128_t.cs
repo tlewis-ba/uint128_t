@@ -380,14 +380,27 @@ namespace BrickAbode.UInt128
         /// <summary>
         /// Indicates whether this instance and a specified object are equal.
         /// </summary>
-        /// <param name="other">The object to compare with the current object.</param>
-        /// <returns>true if <paramref name="other"/> and this instance are the same type and represent the same value; otherwise, false.</returns>
+        /// <param name="obj">The object to compare with the current object.</param>
+        /// <returns>true if <paramref name="obj"/> and this instance are the same type and represent the same value; otherwise, false.</returns>
         public override bool Equals(object? obj)
         {
             return obj is UInt128 other && Equals(other);
         }
 
+        /// <summary>
+        /// Determines whether two specified instances of <see cref="UInt128"/> are equal.
+        /// </summary>
+        /// <param name="left">The first value to compare.</param>
+        /// <param name="right">The second value to compare.</param>
+        /// <returns>true if <paramref name="left"/> and <paramref name="right"/> are equal; otherwise, false.</returns>
         public static bool operator ==(UInt128 left, UInt128 right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two specified instances of <see cref="UInt128"/> are not equal.
+        /// </summary>
+        /// <param name="left">The first value to compare.</param>
+        /// <param name="right">The second value to compare.</param>
+        /// <returns>true if <paramref name="left"/> and <paramref name="right"/> are not equal; otherwise, false.</returns>
         public static bool operator !=(UInt128 left, UInt128 right) => !(left == right);
 
         #endregion
@@ -410,6 +423,41 @@ namespace BrickAbode.UInt128
         /// </summary>
         /// <returns>A string representation of the value of this instance.</returns>
         public override string ToString() => ToString(null, null); // default
+
+        /// <summary>
+        /// Converts the numeric value of this instance to its equivalent
+        /// string representation using the specified format and culture-specific
+        /// format information.
+        /// </summary>
+        /// <param name="format">
+        /// A standard or custom numeric format string. Standard
+        /// format strings are single characters from the set 'G', 'D', 'X',
+        /// 'F', etc., which control the formatting of the output string. Custom
+        /// format strings are based on the format specification for <see
+        /// cref="System.Numerics.BigInteger"/> since <see cref="UInt128"/> is
+        /// internally represented as such for some operations.
+        /// </param>
+        /// <param name="formatProvider">
+        /// An object that supplies culture-specific
+        /// formatting information. This parameter is used to obtain a <see
+        /// cref="System.Globalization.NumberFormatInfo"/> object that provides
+        /// numeric formatting information. If <c>null</c>, the formatting of the
+        /// current culture is used.
+        /// </param>
+        /// <returns>
+        /// The string representation of the current <see cref="UInt128"/>
+        /// value in the format specified by the <paramref name="format"/> parameter
+        /// and the <paramref name="formatProvider"/>.
+        /// </returns>
+        /// <remarks>
+        /// The method supports standard numeric format strings
+        /// and custom numeric format strings that are valid for <see
+        /// cref="System.Numerics.BigInteger"/>. This allows for a wide range
+        /// of formatting options, including decimal, hexadecimal, and binary
+        /// representations. For more information on numeric format strings, see the
+        /// documentation for <see cref="System.Numerics.BigInteger.ToString(string?,
+        /// IFormatProvider?)"/>.
+        /// </remarks>
         public string ToString(string? format, IFormatProvider? formatProvider)
         {
             // Handle null or empty format by using the "G" (General) format.
