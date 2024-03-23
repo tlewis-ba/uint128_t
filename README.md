@@ -7,6 +7,13 @@ operate as an integer type, so notably, they are mutable.  This is
 unusual for struct types but normal for integers, which are also
 struct types.
 
+UInt128 is fast at everything except division and modulo; for those
+operations, we just convert to BigInteger, do the operation, and convert
+back.  Large number division is tricky, it's expensive no matter how
+you do it, and it's not really the intended use case for this datatype
+anyway.  Feel free to submit a good implementation if you are
+competent at numerics.
+
 ## Notes
 
 - It's strange that BigInteger doesn't implement IConvertible; maybe we should add it
