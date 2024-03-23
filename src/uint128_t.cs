@@ -40,13 +40,18 @@ namespace BrickAbode.UInt128
         /// <summary>
         /// Represents the maximum value that a <see cref="UInt128"/> instance can hold.
         /// </summary>
-        public static readonly int MaxValue = new UInt128(ulong.MaxValue, ulong.MaxValue);
+        public static readonly UInt128 MaxValue = new UInt128(ulong.MaxValue, ulong.MaxValue);
 
         /// <summary>
         /// Represents the minimum value that a <see cref="UInt128"/> instance can hold.
         /// </summary>
         public static readonly int MinValue = new UInt128(0, 0);
 
+        /// <summary>
+        /// Represents the zero value for <see cref="UInt128"/>, which is the same as MinValue
+        /// for unsigneds but not for all numbers, so provided as a courtesy to devs and a nod
+        /// to Peano.
+        /// </summary>
         public static readonly int Zero = new UInt128(0, 0);
 
         #endregion
@@ -126,10 +131,12 @@ namespace BrickAbode.UInt128
         public static UInt128 operator +(UInt128 a, UInt128 b)
         {
             ulong lowSum = a.low + b.low;
+
             // Calculate carry without a branch
             bool carry = (lowSum < a.low) | (lowSum < b.low);
+            ulong carry_bit = carry ? 1UL : 0UL; // I hate branches
             // Add the high parts with the carry. Overflow in high parts exceeds UInt128 range and is ignored.
-            ulong highSum = a.high + b.high + Convert.ToUInt64(carry);
+            ulong highSum = a.high + b.high + carry_bit;
 
             return new UInt128(highSum, lowSum);
         }
@@ -157,6 +164,16 @@ namespace BrickAbode.UInt128
         /// <returns>The product of <paramref name="a"/> and <paramref name="b"/>.</returns>
         public static UInt128 operator *(UInt128 a, UInt128 b)
         {
+            // We break the operands into four 32-bit pieces, multiply them
+            // into 64-bit values, then shift and add those to get the result.
+            // This 4x4 multiplication gives us sixteen products,
+            // but we skip the high values which would be yeeted out
+            // the top of the available 128 bits anyway.
+            // The resulting calculation is 8 extractions, 10 multiplications,
+            // and ten additions, and they're highly parallel, so modern
+            // CPUs should eat them up.  I don't think there are any branches
+            // hiding in here.
+
             ulong a0 = a.low & 0xffffffff;
             ulong a1 = a.low >> 32;
             ulong a2 = a.high & 0xffffffff;
@@ -173,15 +190,15 @@ namespace BrickAbode.UInt128
             ulong p4 = a1 * b0;
             ulong p5 = a1 * b1;
             ulong p6 = a1 * b2;
-            // ulong p7 = a1 * b3;
+            // ulong p7 = a1 * b3; //  skipped; too big to matter
             ulong p8 = a2 * b0;
             ulong p9 = a2 * b1;
-            // ulong p10 = a2 * b2;
-            // ulong p11 = a2 * b3;
+            // ulong p10 = a2 * b2; //  skipped; too big to matter
+            // ulong p11 = a2 * b3; //  skipped; too big to matter
             ulong p12 = a3 * b0;
-            // ulong p13 = a3 * b1;
-            // ulong p14 = a3 * b2;
-            // ulong p15 = a3 * b3;
+            // ulong p13 = a3 * b1; //  skipped; too big to matter
+            // ulong p14 = a3 * b2; //  skipped; too big to matter
+            // ulong p15 = a3 * b3; //  skipped; too big to matter
 
             ulong low = 0;
             ulong high = 0;
@@ -217,6 +234,7 @@ namespace BrickAbode.UInt128
         /// <returns>The quotient of <paramref name="a"/> divided by <paramref name="b"/>.</returns>
         public static UInt128 operator /(UInt128 a, UInt128 b)
         {
+            // Division is hard, so we just outsource it.
             BigInteger bigA = ToBigInteger(a);
             BigInteger bigB = ToBigInteger(b);
             BigInteger result = bigA / bigB;
@@ -231,6 +249,7 @@ namespace BrickAbode.UInt128
         /// <returns>The remainder of <paramref name="a"/> divided by <paramref name="b"/>.</returns>
         public static UInt128 operator %(UInt128 a, UInt128 b)
         {
+            // Division is hard, so we just outsource it.
             BigInteger bigA = ToBigInteger(a);
             BigInteger bigB = ToBigInteger(b);
             BigInteger result = bigA % bigB;
@@ -262,10 +281,8 @@ namespace BrickAbode.UInt128
         public static UInt128 operator ++(UInt128 a)
         {
             a.low++;
-            if (a.low == 0)
-            {
-                a.high++;
-            }
+            // if (a.low == 0) { a.high++; }
+            a.high += (ulong)((a.low | (~a.low + 1)) >> 63 & 1); // branchlessly detect overflow
             return a;
         }
 
@@ -342,8 +359,6 @@ namespace BrickAbode.UInt128
         #endregion
 
         #region Shift Operators
-
-        // FIXME: both of these should be fixed to the mutable style
 
         /// <summary>
         /// Shifts a <see cref="UInt128"/> value a specified number of bits to the left.
@@ -502,7 +517,7 @@ namespace BrickAbode.UInt128
         /// Converts the numeric value of this instance to its equivalent string representation.
         /// </summary>
         /// <returns>A string representation of the value of this instance.</returns>
-        public override string ToString() => ToString(null, null); // default
+        public override string ToString() => ToString("X", null);
 
         /// <summary>
         /// Converts the numeric value of this instance to its equivalent
@@ -608,15 +623,19 @@ namespace BrickAbode.UInt128
         /// <returns>A string representation of the value of this instance.</returns>
         string IConvertible.ToString(IFormatProvider? provider) => ToString();
 
-	    /// <summary>
-	    /// Returns the <see cref="TypeCode"/> for this instance.
-	    /// </summary>
-	    /// <returns>
-	    /// Returns the constant value <see cref="TypeCode.Object"/>.  N.b.
-	    /// that UInt128 is a struct type, but dotnet TypeCodes do not
-	    /// differentiate between struct and object types; the generic
-	    /// type for non-builtin types is just <see cref="TypeCode.Object"/>.
-	    /// </returns>
+        /// <summary>
+        /// Returns the <see cref="TypeCode"/> for this instance.
+        /// </summary>
+        /// <returns>
+        /// Returns the (generic) constant value <see cref="TypeCode.Object"/>.
+        /// Personally, I find this a little confusing; all values in dotnet are
+        /// either struct type or class type, and when we think "object" we
+        /// normally think of an instance of a class, but all values in dotnet
+        /// are objects, whether class or struct.  UInt128 is a struct type,
+        /// also called a value type, unlike an "object", like a class instance
+        /// or array, which are reference types, but they are all "Object" in
+        /// dotnet's eyes.  That's why we use this type code.
+        /// </returns>
         TypeCode IConvertible.GetTypeCode() => TypeCode.Object;
 
         /// <summary>
