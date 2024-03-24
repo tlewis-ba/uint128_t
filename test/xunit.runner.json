@@ -1,0 +1,7 @@
+{
+  "$schema": "https://xunit.net/schema/current/xunit.runner.schema.json",
+  "comment": "Set these to `false` to run tests sequentially for readability",
+  "parallelizeAssembly": true,
+  "parallelizeTestCollections": true
+}
+
