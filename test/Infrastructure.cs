@@ -1,16 +1,70 @@
 using System;
 using System.Numerics;
 using Xunit;
+using Xunit.Abstractions;
 using BrickAbode.UInt128;
 using BrickAbode.UInt128.Tests;
 
+
 namespace BrickAbode.UInt128.Tests
 {
-
-    public static class UInt128TestHelper
+    public class TestLogger
     {
+        private readonly ITestOutputHelper outputHelper;
+        private readonly LogLevel currentLogLevel;
 
-        public static void AssertOperation(UInt128 a, UInt128 b, Operation operation, int shiftAmount = 0)
+        public TestLogger(ITestOutputHelper outputHelper)
+        {
+            this.outputHelper = outputHelper;
+            currentLogLevel = LogLevel.Info; // Default level
+            var envLogLevel = Environment.GetEnvironmentVariable("XUNIT_DEBUG");
+            if (!string.IsNullOrWhiteSpace(envLogLevel))
+            {
+                var success = Enum.TryParse(envLogLevel, true, out LogLevel parsedLevel);
+                Console.WriteLine($"Parse of {envLogLevel} output {parsedLevel}, success = {success}");
+                if(success)
+                {
+                    currentLogLevel = parsedLevel;
+                }
+            }
+        }
+
+        public enum LogLevel
+        {
+            Debug = 1,
+            Info = 2,
+            Warning = 3,
+            Error = 4,
+            Critical = 5,
+            Off = (1<<16) 
+        }
+
+        private void Log(LogLevel logLevel, string message)
+        {
+            if (logLevel >= currentLogLevel && outputHelper != null)
+            {
+                Console.WriteLine($"GOOD-LOG({logLevel}/{currentLogLevel}/{outputHelper}): {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} [{logLevel}] {message}");
+                outputHelper.WriteLine($"{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} [{logLevel}] {message}");
+            }
+        }
+
+        public void Debug(string message) => Log(LogLevel.Debug, message);
+        public void Info(string message) => Log(LogLevel.Info, message);
+        public void Warning(string message) => Log(LogLevel.Warning, message);
+        public void Error(string message) => Log(LogLevel.Error, message);
+        public void Critical(string message) => Log(LogLevel.Critical, message);
+
+    }
+
+    public class UInt128TestHelper
+    {
+        private TestLogger logger;
+        public UInt128TestHelper(TestLogger tlogger)
+        {
+            logger = tlogger;
+        }
+
+        public void AssertOperation(UInt128 a, UInt128 b, Operation operation, int shiftAmount = 0)
         {
             // Use the existing ToBigInteger conversion method
             var bigA = UInt128.ToBigInteger(a);
@@ -25,7 +79,7 @@ namespace BrickAbode.UInt128.Tests
             (BigInteger expectedBig, UInt128 result, string op) = operation switch
             {
                 Operation.Add         => (bigA + bigB,            a + b,             "+"),
-                Operation.Subtract    => (sub_amt,                a - b,             "-"), 
+                Operation.Subtract    => (sub_amt,                a - b,             "-"),
                 Operation.Multiply    => (bigA * bigB,            a * b,             "*"),
                 Operation.Divide      => (bigA / bigB,            a / b,             "/"),
                 Operation.Modulus     => (bigA % bigB,            a % b,             "%"),
@@ -46,14 +100,17 @@ namespace BrickAbode.UInt128.Tests
             {
                 if (operation == Operation.Not)
                 {
+                    logger.Error($"FAILURE: UInt128 (~{a:X} = {result:X}) != BigInteger(~{bigA:X} = {expectedBig:X})");
                     throw new InvalidOperationException($"Assertion Failed: Expected result was {expected}, but got ~{a} = {result}.");
                 }
+                logger.Error($"FAILURE: UInt128 ({a:X} {op} {b:X} = {result:X}) != BigInteger({bigA:X} {op} {bigB:X} = {expectedBig:X})");
                 throw new InvalidOperationException($"Assertion Failed: Expected result was {expected}, but got {a} {op} {b} = {result}.");
             }
+            logger.Debug($"SUCCESS: UInt128 ({a:X} {op} {b:X} = {result:X}) == BigInteger({bigA:X} {op} {bigB:X} = {expectedBig:X})");
         }
 
 
-        public static void TestOperation(UInt128TestHelper.Operation operation, int? shiftAmount = null)
+        public void TestOperation(UInt128TestHelper.Operation operation, int? shiftAmount = null)
         {
             foreach (var a in testValues)
             {
@@ -63,12 +120,12 @@ namespace BrickAbode.UInt128.Tests
                     {
                         foreach (var shiftAmt in shiftAmounts)
                         {
-                            UInt128TestHelper.AssertOperation(a, b, operation, shiftAmt);
+                            AssertOperation(a, b, operation, shiftAmt);
                         }
                     }
                     else
                     {
-                        UInt128TestHelper.AssertOperation(a, b, operation);
+                        AssertOperation(a, b, operation);
                     }
                 }
             }
@@ -92,7 +149,7 @@ namespace BrickAbode.UInt128.Tests
         }
 
         // Standard test values
-        public static UInt128[] testValues = new UInt128[]
+        public readonly UInt128[] testValues = new UInt128[]
         {
             new UInt128(0, 0),  // Zero
             new UInt128(0, 1),  // Near Zero
@@ -137,7 +194,19 @@ namespace BrickAbode.UInt128.Tests
             new UInt128(0x7FFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL)     // 2**127-1, a Mersenne prime
         };
 
-        public static readonly int[] shiftAmounts = new int[] { 0, 1, 7, 8, 9, 63, 64, 65, 119, 127, 128 };
+        public readonly int[] shiftAmounts = new int[] { 0, 1, 7, 8, 9, 63, 64, 65, 119, 127, 128 };
 
+    }
+
+    public class UInt128TestBase
+    {
+        public TestLogger logger;
+        public UInt128TestHelper helper;
+        public UInt128TestBase(ITestOutputHelper output)
+        {
+            logger = new TestLogger(output); // Initialize the logger with an ITestOutputHelper instance
+            helper = new UInt128TestHelper(logger); // Initialize the logger with an ITestOutputHelper instance
+            logger.Debug("Starting test run");
+        }
     }
 }

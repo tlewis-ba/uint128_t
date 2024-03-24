@@ -1,28 +1,33 @@
 using System;
 using System.Numerics;
 using Xunit;
+using Xunit.Abstractions;
 using BrickAbode.UInt128;
 using BrickAbode.UInt128.Tests;
 
 namespace BrickAbode.UInt128.Tests.Bitwise
 {
 
-    public class UInt128Tests_Bitwise
+    public class UInt128Tests_Bitwise : UInt128TestBase
     {
 
-        [Fact]
-        public void BitwiseAndWithDifferingBits() => UInt128TestHelper.TestOperation(UInt128TestHelper.Operation.And);
+        public UInt128Tests_Bitwise(ITestOutputHelper output) : base(output)
+        {
+        }
 
         [Fact]
-        public void BitwiseOrWithComplementaryBits() => UInt128TestHelper.TestOperation(UInt128TestHelper.Operation.Or);
+        public void BitwiseAndWithDifferingBits() => helper.TestOperation(UInt128TestHelper.Operation.And);
 
         [Fact]
-        public void BitwiseXorWithIdenticalValues() => UInt128TestHelper.TestOperation(UInt128TestHelper.Operation.Xor);
+        public void BitwiseOrWithComplementaryBits() => helper.TestOperation(UInt128TestHelper.Operation.Or);
+
+        [Fact]
+        public void BitwiseXorWithIdenticalValues() => helper.TestOperation(UInt128TestHelper.Operation.Xor);
 
         [Fact]
         public void BitwiseNotOnMaxValue()
         {
-            foreach (var a in UInt128TestHelper.testValues)
+            foreach (var a in helper.testValues)
             {
                 UInt128 b = ~a;
                 UInt128 expected = UInt128.MaxValue;
@@ -37,7 +42,7 @@ namespace BrickAbode.UInt128.Tests.Bitwise
         [Fact]
         public void LeftShiftAcrossBoundary()
         {
-            UInt128TestHelper.AssertOperation(
+            helper.AssertOperation(
                 1,
                 0, // Not used for shift operations
                 UInt128TestHelper.Operation.LeftShift,
@@ -47,7 +52,7 @@ namespace BrickAbode.UInt128.Tests.Bitwise
         [Fact]
         public void RightShiftAcrossBoundary()
         {
-            UInt128TestHelper.AssertOperation(
+            helper.AssertOperation(
                 new UInt128(1, 0), // 1<<64
                 0, // Not used for shift operations
                 UInt128TestHelper.Operation.RightShift,
