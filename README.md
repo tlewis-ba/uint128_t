@@ -12,7 +12,7 @@ operations, we just convert to BigInteger, do the operation, and convert
 back.  Large number division is tricky, it's expensive no matter how
 you do it, and it's not really the intended use case for this datatype
 anyway.  Feel free to submit a good implementation if you are
-competent at numerics.
+like numerics.
 
 ## Notes
 
@@ -34,7 +34,6 @@ class would work the same.
 | Bitwise OR (`|`)                 | `System.Runtime.Intrinsics.X86.Sse2.Or`                     | `System.Runtime.Intrinsics.Arm.Arm64.Or`                    |
 | Bitwise XOR (`^`)                | `System.Runtime.Intrinsics.X86.Sse2.Xor`                    | `System.Runtime.Intrinsics.Arm.Arm64.Xor`                   |
 | Bitwise NOT (`~`)                | `System.Runtime.Intrinsics.X86.Sse2.Not`                    | `System.Runtime.Intrinsics.Arm.Arm64.Not`                   |
-
 
 ## Testing
 
