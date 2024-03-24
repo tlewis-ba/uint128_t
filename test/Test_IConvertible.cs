@@ -5,10 +5,8 @@ using BrickAbode.UInt128;
 
 namespace BrickAbode.UInt128.Tests.IConvertible
 {
-
     public static class UInt128TestHelper
     {
-
         public static void AssertConversion<T>(UInt128 val)
         {
             // Convert UInt128 value to BigInteger for comparison
@@ -24,13 +22,11 @@ namespace BrickAbode.UInt128.Tests.IConvertible
             // Assert that the converted values are equal
             Assert.Equal(convertedFromBigInteger, convertedFromUInt128);
         }
-
-
     }
 
     public class UInt128Tests_Arithmetic
     {
-        [Fact(Skip="BigInteger is stupid")]
+        [Fact(Skip="BigInteger behaves unexpectedly")]
         public void ConvertToDouble_ComparisonWithBigInteger()
         {
             // Create a UInt128 value for testing
@@ -39,7 +35,5 @@ namespace BrickAbode.UInt128.Tests.IConvertible
             // Test conversion to double using the generic type parameter
             UInt128TestHelper.AssertConversion<double>(value);
         }
-
     }
-
 }
