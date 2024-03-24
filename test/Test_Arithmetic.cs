@@ -1,12 +1,13 @@
 using System;
 using System.Numerics;
 using Xunit;
-
 using BrickAbode.UInt128;
+using BrickAbode.UInt128.Tests;
 
 namespace BrickAbode.UInt128.Tests.Arithmetic {
 
-    public static class UInt128TestHelper
+#if UNDEFINED
+    public static class UInt128TestHelperOrig
     {
         public enum Operation
         {
@@ -46,124 +47,125 @@ namespace BrickAbode.UInt128.Tests.Arithmetic {
             }
         }
     }
+#endif
 
     public class UInt128Tests_Arithmetic
     {
         [Fact]
             public void AddLeadingToHighIncrement()
             {
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         new UInt128(1UL << 63, 1),
                         new UInt128(1UL << 63, ulong.MaxValue - 1),
-                        UInt128TestHelper.Operation.Add);
+                        UInt128TestHelperOrig.Operation.Add);
             }
 
         [Fact]
             public void AddResultingInMaxValue()
             {
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         UInt128.MaxValue - 1,
                         1,
-                        UInt128TestHelper.Operation.Add);
+                        UInt128TestHelperOrig.Operation.Add);
             }
 
         [Fact]
             public void AddOverflowWrapAround()
             {
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         UInt128.MaxValue,
                         1,
-                        UInt128TestHelper.Operation.Add);
+                        UInt128TestHelperOrig.Operation.Add);
             }
 
         [Fact]
             public void SubtractWithZeroResult()
             {
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         new UInt128(1, 0), // 1<<64
                         new UInt128(1, 0), // 1<<64
-                        UInt128TestHelper.Operation.Subtract);
+                        UInt128TestHelperOrig.Operation.Subtract);
             }
 
         [Fact]
             public void SubtractLeadingToHighDecrement()
             {
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         new UInt128(1, 0), // 1<<64
                         1,
-                        UInt128TestHelper.Operation.Subtract);
+                        UInt128TestHelperOrig.Operation.Subtract);
             }
 
         [Fact]
             public void SubtractUnderflowWrapAround()
             {
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         0,
                         1,
-                        UInt128TestHelper.Operation.Subtract);
+                        UInt128TestHelperOrig.Operation.Subtract);
             }
 
         [Fact]
             public void MultiplyLeadingToHighComponent()
             {
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         new UInt128(0, 1UL << 32),
                         new UInt128(0, 1UL << 32),
-                        UInt128TestHelper.Operation.Multiply);
+                        UInt128TestHelperOrig.Operation.Multiply);
             }
 
         [Fact]
             public void MultiplyWithOverflowWrapAround()
             {
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         new UInt128(0, (1UL << 64) - 1),
                         2,
-                        UInt128TestHelper.Operation.Multiply);
+                        UInt128TestHelperOrig.Operation.Multiply);
             }
 
         [Fact]
             public void DivideWithNoRemainder()
             {
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         new UInt128(1, 0), // 1<<64
                         new UInt128(0, 1UL << 32),
-                        UInt128TestHelper.Operation.Divide);
+                        UInt128TestHelperOrig.Operation.Divide);
             }
 
         [Fact]
             public void DivideWithMaximumValue()
             {
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         UInt128.MaxValue,
                         1,
-                        UInt128TestHelper.Operation.Divide);
+                        UInt128TestHelperOrig.Operation.Divide);
             }
 
         [Fact]
             public void DivideResultingInMinimumValue()
             {
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         UInt128.MaxValue,
                         UInt128.MaxValue,
-                        UInt128TestHelper.Operation.Divide);
+                        UInt128TestHelperOrig.Operation.Divide);
             }
 
         [Fact]
             public void ModulusWithNoRemainder()
             {
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         new UInt128(1, 0), // 1<<64
                         new UInt128(0, 1UL << 32),
-                        UInt128TestHelper.Operation.Modulus);
+                        UInt128TestHelperOrig.Operation.Modulus);
             }
 
         [Fact]
             public void ModulusWithRemainder()
             {
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         new UInt128(2, 1), // (1<<65) + 1
                         new UInt128(1, 0), // 1<<64
-                        UInt128TestHelper.Operation.Modulus);
+                        UInt128TestHelperOrig.Operation.Modulus);
             }
 
         [Fact]
@@ -172,10 +174,10 @@ namespace BrickAbode.UInt128.Tests.Arithmetic {
                 var a = new UInt128(0, UInt64.MaxValue);
                 a++;
 
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         a,
                         new UInt128(1, 0),
-                        UInt128TestHelper.Operation.Equals);
+                        UInt128TestHelperOrig.Operation.Equals);
             }
 
         [Fact]
@@ -183,10 +185,10 @@ namespace BrickAbode.UInt128.Tests.Arithmetic {
             {
                 var a = UInt128.MaxValue;
                 a++;
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         a,
                         new UInt128(0, 0),
-                        UInt128TestHelper.Operation.Equals);
+                        UInt128TestHelperOrig.Operation.Equals);
             }
 
         [Fact]
@@ -194,10 +196,10 @@ namespace BrickAbode.UInt128.Tests.Arithmetic {
             {
                 var a = new UInt128(1, 0);
                 a--;
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         a,
                         new UInt128(0, UInt64.MaxValue),
-                        UInt128TestHelper.Operation.Equals);
+                        UInt128TestHelperOrig.Operation.Equals);
             }
 
         [Fact]
@@ -205,10 +207,10 @@ namespace BrickAbode.UInt128.Tests.Arithmetic {
             {
                 var a = new UInt128(0, 0);
                 a--;
-                UInt128TestHelper.AssertOperation(
+                UInt128TestHelperOrig.AssertOperation(
                         a,
                         UInt128.MaxValue,
-                        UInt128TestHelper.Operation.Equals);
+                        UInt128TestHelperOrig.Operation.Equals);
             }
 
     }
