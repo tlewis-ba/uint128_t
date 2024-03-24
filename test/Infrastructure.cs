@@ -16,13 +16,11 @@ namespace BrickAbode.UInt128.Tests
         public TestLogger(ITestOutputHelper outputHelper)
         {
             this.outputHelper = outputHelper;
-            currentLogLevel = LogLevel.Info; // Default level
             var envLogLevel = Environment.GetEnvironmentVariable("XUNIT_DEBUG");
+            currentLogLevel = LogLevel.Warning;
             if (!string.IsNullOrWhiteSpace(envLogLevel))
             {
-                var success = Enum.TryParse(envLogLevel, true, out LogLevel parsedLevel);
-                Console.WriteLine($"Parse of {envLogLevel} output {parsedLevel}, success = {success}");
-                if(success)
+                if(Enum.TryParse(envLogLevel, true, out LogLevel parsedLevel))
                 {
                     currentLogLevel = parsedLevel;
                 }
@@ -31,20 +29,21 @@ namespace BrickAbode.UInt128.Tests
 
         public enum LogLevel
         {
+            All = 0,
             Debug = 1,
             Info = 2,
             Warning = 3,
             Error = 4,
             Critical = 5,
-            Off = (1<<16) 
+            Off = 1<<16 - 1,
         }
 
         private void Log(LogLevel logLevel, string message)
         {
             if (logLevel >= currentLogLevel && outputHelper != null)
             {
-                Console.WriteLine($"GOOD-LOG({logLevel}/{currentLogLevel}/{outputHelper}): {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} [{logLevel}] {message}");
-                outputHelper.WriteLine($"{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} [{logLevel}] {message}");
+                Console.WriteLine($"LOG({logLevel}/{currentLogLevel}/{outputHelper}): {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} [{logLevel}] {message}");
+                // outputHelper.WriteLine($"LOG {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} [{logLevel}] {message}");
             }
         }
 
@@ -106,7 +105,7 @@ namespace BrickAbode.UInt128.Tests
                 logger.Error($"FAILURE: UInt128 ({a:X} {op} {b:X} = {result:X}) != BigInteger({bigA:X} {op} {bigB:X} = {expectedBig:X})");
                 throw new InvalidOperationException($"Assertion Failed: Expected result was {expected}, but got {a} {op} {b} = {result}.");
             }
-            logger.Debug($"SUCCESS: UInt128 ({a:X} {op} {b:X} = {result:X}) == BigInteger({bigA:X} {op} {bigB:X} = {expectedBig:X})");
+            logger.Debug($"SUCCESS: UInt128 (0x{a:X} {op} 0x{b:X} = 0x{result:X}) == BigInteger(0x{bigA:X} {op} 0x{bigB:X} = 0x{expectedBig:X})");
         }
 
 
@@ -206,7 +205,7 @@ namespace BrickAbode.UInt128.Tests
         {
             logger = new TestLogger(output); // Initialize the logger with an ITestOutputHelper instance
             helper = new UInt128TestHelper(logger); // Initialize the logger with an ITestOutputHelper instance
-            logger.Debug("Starting test run");
+            logger.Debug($"Starting test run: {this.GetType().Name}");
         }
     }
 }

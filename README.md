@@ -14,6 +14,14 @@ you do it, and it's not really the intended use case for this datatype
 anyway.  Feel free to submit a good implementation if you are
 like numerics.
 
+## Testing and usage
+
+To test the code, go to `test/` and run `dotnet test`.  To see details of
+each test, run `XUNIT_DEBUG=Debug dotnet test`.  Consider changing the
+settings "parallelizeAssembly" and "parallelizeTestCollections" in
+`test/xunit.runner.json` to see the results in order.
+
+
 ## Notes
 
 - It's strange that BigInteger doesn't implement IConvertible; maybe we should add it
