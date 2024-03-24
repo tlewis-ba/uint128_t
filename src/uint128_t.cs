@@ -143,6 +143,7 @@ namespace BrickAbode.UInt128
 
         /// <summary>
         /// Subtracts one <see cref="UInt128"/> value from another and returns the result.
+        /// We underflow similarly to ulong: 1UL - 2UL = 18446744073709551615UL
         /// </summary>
         /// <param name="a">The value to subtract from.</param>
         /// <param name="b">The value to subtract.</param>
@@ -561,7 +562,7 @@ namespace BrickAbode.UInt128
             switch (fmt)
             {
                 case "X": // Hexadecimal format
-                    return $"0x{high:X16}{low:X16}";
+                    return $"{high:X16}{low:X16}";
                 case "B": // Binary format - a custom implementation might be needed here
                     return ConvertToBinaryString();
                 // case "D": // Decimal format
