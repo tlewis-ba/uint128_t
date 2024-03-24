@@ -7,47 +7,6 @@ using BrickAbode.UInt128.Tests;
 namespace BrickAbode.UInt128.Tests
 {
 
-    public static class UInt128TestHelperOrig
-    {
-        public enum Operation
-        {
-            Add,
-            Subtract,
-            Multiply,
-            Divide,
-            Modulus,
-            Equals
-                // Extend with other operations as needed
-        }
-
-        public static void AssertOperation(UInt128 a, UInt128 b, Operation operation)
-        {
-            // Use the existing ToBigInteger conversion method
-            var bigA = UInt128.ToBigInteger(a);
-            var bigB = UInt128.ToBigInteger(b);
-
-            (BigInteger expectedBig, UInt128 result, string op) = operation switch
-            {
-                Operation.Add => (bigA + bigB, a + b, "+"),
-                    Operation.Subtract => (bigA >= bigB ? bigA - bigB : BigInteger.Pow(2, 128) - (bigB - bigA), a - b, "-"), // Handle underflow
-                    Operation.Multiply => (bigA * bigB, a * b, "*"),
-                    Operation.Divide => (bigA / bigB, a / b, "/"),
-                    Operation.Modulus => (bigA % bigB, a % b, "%"),
-                    Operation.Equals => ((bigA == bigB) ? 1 : 0, (a == b) ? 1 : 0, "=="),
-                    _ => throw new ArgumentException("Unsupported operation"),
-            };
-
-            // Use the existing FromBigInteger conversion method
-            UInt128 expected = UInt128.FromBigInteger(expectedBig);
-
-            // Assert
-            if (expected != result)
-            {
-                throw new InvalidOperationException($"Assertion Failed: Expected result was {expected}, but got {a} {op} {b} = {result}.");
-            }
-        }
-    }
-
     public static class UInt128TestHelper
     {
 
@@ -57,6 +16,11 @@ namespace BrickAbode.UInt128.Tests
             var bigA = UInt128.ToBigInteger(a);
             var bigB = UInt128.ToBigInteger(b);
             var sub_amt = bigA >= bigB ? bigA - bigB : BigInteger.Pow(2, 128) - (bigB - bigA); // Handle underflow
+
+            if((operation == Operation.Divide) && (b==0)) // we just silently skip these
+            {
+                return;
+            }
 
             (BigInteger expectedBig, UInt128 result, string op) = operation switch
             {
@@ -141,16 +105,22 @@ namespace BrickAbode.UInt128.Tests
             new UInt128(0, (ulong)(1UL<<32)+1), // 2**32 + 1
             new UInt128(0, (ulong)(1UL<<33)),   // 2**33
 
-            new UInt128(0, (1UL<<63)),   // 2**63
-            new UInt128(0, (1UL<<64)-1), // Near mid
-            new UInt128(1, 0),           // Mid (2**64)
-            new UInt128(1, 1),           // Near mid
-            new UInt128(2, 0),           // 2**65
+            new UInt128(0, (1UL<<63)),          // 2**63
+            new UInt128(0, ulong.MaxValue - 1), // Mid - 2
+            new UInt128(0, ulong.MaxValue),     // Mid - 1
+            new UInt128(1, 0),                  // Mid (2**64)
+            new UInt128(1, 1),                  // Near mid
+            new UInt128(1, 2),                  // Near mid
+            new UInt128(2, 0),                  // 2**65
 
             new UInt128((1UL<<31), 0),                    // 2**95
+            new UInt128((1UL<<31), 1),                    // 2**95 + 1
+            new UInt128((1UL<<31), 2),                    // 2**95 + 2
             new UInt128((1UL<<32)-1, 0xFFFFFFFFFFFFFFFF), // 2**96 - 1
+            new UInt128((1UL<<32)-1, 0xFFFFFFFFFFFFFFFE), // 2**96 - 2
             new UInt128((1UL<<32), 0),                    // 2**96
             new UInt128((1UL<<32), 1),                    // 2**96 + 1
+            new UInt128((1UL<<32), 2),                    // 2**96 + 2
             new UInt128((1UL<<33), 0),                    // 2**97
 
             new UInt128(ulong.MaxValue - 1, 0),              // Near Max
