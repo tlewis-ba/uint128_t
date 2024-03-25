@@ -77,7 +77,7 @@ namespace BrickAbode.UInt128.Tests.Arithmetic {
         [Fact]
         public void SubtractTest() => helper.TestOperation(UInt128TestHelper.Operation.Subtract);
 
-        [Fact(Skip="Code looks broken; yay!")]
+        [Fact]
         public void MultiplyTest() => helper.TestOperation(UInt128TestHelper.Operation.Multiply);
 
         [Fact]

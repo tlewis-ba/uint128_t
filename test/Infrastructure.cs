@@ -100,10 +100,10 @@ namespace BrickAbode.UInt128.Tests
                 if (operation == Operation.Not)
                 {
                     logger.Error($"FAILURE: UInt128 (~{a:X} = {result:X}) != BigInteger(~{bigA:X} = {expectedBig:X})");
-                    throw new InvalidOperationException($"Assertion Failed: Expected result was {expected}, but got ~{a} = {result}.");
+                    throw new InvalidOperationException($"Assertion Failed: Expected result was {expected:X}, but got ~{a:X} = {result:X}.");
                 }
                 logger.Error($"FAILURE: UInt128 ({a:X} {op} {b:X} = {result:X}) != BigInteger({bigA:X} {op} {bigB:X} = {expectedBig:X})");
-                throw new InvalidOperationException($"Assertion Failed: Expected result was {expected}, but got {a} {op} {b} = {result}.");
+                throw new InvalidOperationException($"Assertion Failed: Expected result was {expected:X}, but got {a:X} {op} {b:X} = {result:X}.");
             }
             logger.Debug($"SUCCESS: UInt128 (0x{a:X} {op} 0x{b:X} = 0x{result:X}) == BigInteger(0x{bigA:X} {op} 0x{bigB:X} = 0x{expectedBig:X})");
         }

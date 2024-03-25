@@ -202,14 +202,19 @@ namespace BrickAbode.UInt128
             // ulong p15 = a3 * b3; //  skipped; too big to matter
 
             ulong low = 0;
+            ulong oldLow = 0;
             ulong high = 0;
 
             low += p0;
+            oldLow = low;
             low += (p1 << 32);
+            if (low < oldLow) high++; // Carry occurred
             high += (p1 >> 32);
             high += p2;
             high += (p3 << 32);
+            oldLow = low;
             low += (p4 << 32);
+            if (low < oldLow) high++; // Carry occurred
             high += (p4 >> 32);
             high += p5;
             high += (p6 << 32);
