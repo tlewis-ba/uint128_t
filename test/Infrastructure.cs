@@ -89,6 +89,20 @@ namespace BrickAbode.UInt128.Tests
                 Operation.Not         => (~bigA,                  ~a,                "~"),
                 Operation.LeftShift   => (bigA << shiftAmount,    a << shiftAmount,  "<<"),
                 Operation.RightShift  => (bigA >> shiftAmount,    a >> shiftAmount,  ">>"),
+
+                // Operation.UnaryPlus => (+bigA, +a, "+"),
+                // Operation.UnaryMinus => (-bigA, -a, "-"),
+                // Operation.AddAssignment => (bigA += bigB, a += b, "+="),
+                // Operation.SubtractAssignment => (bigA -= bigB, a -= b, "-="),
+                // Operation.MultiplyAssignment => (bigA *= bigB, a *= b, "*="),
+                // Operation.DivideAssignment => (bigA /= bigB, a /= b, "/="),
+                // Operation.ModulusAssignment => (bigA %= bigB, a %= b, "%="),
+                // Operation.AndAssignment => (bigA &= bigB, a &= b, "&="),
+                // Operation.OrAssignment => (bigA |= bigB, a |= b, "|="),
+                // Operation.XorAssignment => (bigA ^= bigB, a ^= b, "^="),
+                // Operation.LeftShiftAssignment => (bigA <<= shiftAmount, a <<= shiftAmount, "<<="),
+                // Operation.RightShiftAssignment => (bigA >>= shiftAmount, a >>= shiftAmount, ">>="),
+
                 _                     => throw new ArgumentException("Unsupported operation"),
             };
 
