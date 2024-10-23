@@ -207,7 +207,7 @@ namespace BrickAbode.UInt128.Tests
             new UInt128(0x7FFFFFFFFFFFFFFFUL, 0xFFFFFFFFFFFFFFFFUL)     // 2**127-1, a Mersenne prime
         };
 
-        public readonly int[] shiftAmounts = new int[] { 0, 1, 7, 8, 9, 63, 64, 65, 119, 127, 128 };
+        public readonly int[] shiftAmounts = new int[] { 0, 1, 7, 8, 9, 31, 32, 33, 39, 63, 64, 65, 71, 72, 119, 127, 128 };
 
     }
 
